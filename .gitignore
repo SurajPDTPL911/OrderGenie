@@ -1,0 +1,23 @@
+node_modules/
+.env
+prisma/migrations/ 
+package-lock.json
+logs
+
+# IDE / Editor Config
+.vscode/
+.idea/
+*.swp
+*.swo
+*.swn
+
+# Build Outputs
+dist/
+build/
+coverage/
+
+# Temporary Files
+tmp/
+temp/
+.DS_Store
+Thumbs.db

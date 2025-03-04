@@ -1,0 +1,194 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id         String   @id @default(uuid())
+  username   String   @unique
+  password   String
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@map("User")
+}
+
+model ParentKyc {
+  id          String   @id @default(uuid())
+  first_name  String
+  middle_name String?
+  last_name   String
+  email       String   @unique
+  is_active   Boolean  @default(true)
+  created_at  DateTime @default(now())
+
+  @@map("ParentKyc")
+}
+
+model ParentPhoneNumber {
+  id         String   @id @default(uuid())
+  number     String   @unique
+  is_active  Boolean  @default(true)
+  created_at DateTime @default(now())
+
+  @@map("ParentPhoneNumber")
+}
+
+model Bin {
+  id         String   @id @default(uuid())
+  bin_number String   @unique
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  is_active  Boolean  @default(true)
+
+  orderfileone    OrderFileOne[]
+  BinKycIndex     BinKycIndex[]
+
+  @@map("BIN")
+}
+
+model CardVendor {
+  id          String   @id @default(uuid())
+  vendor_name String
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+  is_active   Boolean  @default(true)
+
+  orderfileone    OrderFileOne[]
+
+  @@map("CardVendor")
+}
+
+model CardNetwork {
+  id           String   @id @default(uuid())
+  network_name String
+  created_at   DateTime @default(now())
+  updated_at   DateTime @updatedAt
+  is_active    Boolean  @default(true)
+
+  orderfileone    OrderFileOne[]
+
+  @@map("CardNetwork")
+}
+
+model CardBank {
+  id         String   @id @default(uuid())
+  bank_name  String
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  is_active  Boolean  @default(true)
+
+  orderfileone    OrderFileOne[]
+
+  @@map("CardBank")
+}
+
+model BinKycIndex {
+  id         Int      @id @default(autoincrement())
+  bin_id     String   @unique
+  bin        Bin      @relation(fields: [bin_id], references: [id], onDelete: Cascade) 
+  kyc_index  Int      @default(0) 
+  phone_index Int     @default(0) 
+  updated_at DateTime @updatedAt
+}
+
+model KycOne {
+  id          String   @id @default(uuid())
+  first_name  String
+  middle_name String?
+  last_name   String
+  email       String   @unique
+  is_active   Boolean  @default(true)
+  created_at  DateTime @default(now())
+
+  PhoneKycOne PhoneKycOne[]
+
+  @@map("KycOne")
+}
+
+model PhoneNumberOne {
+  id         String   @id @default(uuid())
+  number     String   @unique
+  is_active  Boolean  @default(true)
+  created_at DateTime @default(now())
+
+  PhoneKycOne PhoneKycOne[]
+
+  @@map("PhoneNumberOne")
+}
+
+model PhoneKycOne {
+  id                   String      @id @default(uuid())
+  kyc_id               String
+  phone_number_id      String
+  created_at           DateTime @default(now())
+  updated_at           DateTime @updatedAt
+  monthly_count_kyc    Int?
+  yearly_count_kyc     Int?
+  monthly_count_number Int?
+  yearly_count_number  Int?
+
+  kyc         KycOne          @relation(fields: [kyc_id], references: [id], onDelete: Cascade)
+  phoneNumber PhoneNumberOne @relation(fields: [phone_number_id], references: [id], onDelete: Cascade)
+
+  orderFileData OrderFileDataOne[]
+
+  @@map("PhoneKycOne")
+}
+
+model OrderFileOne {
+  id              String  @id @default(uuid()) 
+  bin_id          String  
+  CardVendor_id  String  
+  CardBank_id    String  
+  CardNetwork_id String  
+
+  bin            Bin          @relation(fields: [bin_id], references: [id], onDelete: Cascade)
+  CardVendor     CardVendor  @relation(fields: [CardVendor_id], references: [id], onDelete: Cascade)
+  CardBank       CardBank    @relation(fields: [CardBank_id], references: [id], onDelete: Cascade)
+  CardNetwork    CardNetwork @relation(fields: [CardNetwork_id], references: [id], onDelete: Cascade)
+
+  filename       String
+  required_KYC   Boolean @default(false)
+  created_at     DateTime @default(now())
+  updated_at     DateTime @updatedAt
+
+  orderFileData   OrderFileDataOne[]
+  utrDetailOne    UtrDetailOne[]
+
+  @@map("OrderFileOne")
+}
+
+model OrderFileDataOne {
+  id             Int      @id @default(autoincrement())  
+  order_file_id  String  
+  phone_kyc_id   String   
+  load_amount_card Int
+
+  orderFile      OrderFileOne  @relation(fields: [order_file_id], references: [id], onDelete: Cascade)
+  phoneKyc       PhoneKycOne  @relation(fields: [phone_kyc_id], references: [id], onDelete: Cascade)
+
+  load_amount    Float
+  dob            DateTime
+  bin            String
+
+  @@map("OrderFileDataOne")
+}
+
+model UtrDetailOne {
+  id             String  @id @default(uuid()) 
+  order_file_id  String  
+  utr_number     String  @unique
+  utr_amount     Float
+
+  orderFile      OrderFileOne  @relation(fields: [order_file_id], references: [id], onDelete: Cascade)
+
+  created_at     DateTime @default(now())
+  updated_at     DateTime @updatedAt
+
+  @@map("UtrDetailOne")
+}
