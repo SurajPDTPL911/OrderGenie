@@ -3,6 +3,8 @@ node_modules/
 prisma/migrations/ 
 package-lock.json
 logs
+files
+pg-local-orderGenie.session.sql
 
 # IDE / Editor Config
 .vscode/

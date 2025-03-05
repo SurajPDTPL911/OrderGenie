@@ -16,7 +16,7 @@ model User {
 
   @@map("User")
 }
-
+  
 model ParentKyc {
   id          String   @id @default(uuid())
   first_name  String
