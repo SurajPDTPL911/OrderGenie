@@ -39,7 +39,7 @@ export const uploadNum = async(req, res) => {
         const uploadData = await parseExcelPNum(filepath);
     
         if(uploadData.length > 0){
-            console.log("Data before insertion:", uploadData.slice(0, 10));
+            console.log("Data before insertion:", uploadData.slice(0, 1));
             await db.batchInsert('ParentPhoneNumber', uploadData, 100);
         }
     

@@ -28,6 +28,7 @@
     "multer": "^1.4.5-lts.1",
     "p-progress": "^1.0.0",
     "pg": "^8.13.3",
+    "pg-copy-streams": "^6.0.6",
     "read-excel-file": "^5.8.6",
     "uuid": "^11.1.0",
     "xlsx": "^0.18.5"
