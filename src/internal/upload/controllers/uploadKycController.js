@@ -16,7 +16,7 @@ export const uploadKyc = async (req, res) => {
 
         if(uploadData.length > 0){
             console.log("data before insertion :", uploadData.slice(0, 10));
-            await  db.batchInsert('ParentKyc', uploadData, 100);
+            await db.batchInsert('ParentKyc', uploadData, 100);
         }
 
         fs.unlinkSync(filepath);
