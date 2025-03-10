@@ -10,7 +10,7 @@ const validateInput = async(req, res) => {
     return { username, password };
 }
 
-export const registerUser = async (req, res) => {
+export const registerUser = async (req, res) => {  
     const validatedInput = await validateInput(req, res);
 
     const result = await registerUserService(validatedInput.username, validatedInput.password);
