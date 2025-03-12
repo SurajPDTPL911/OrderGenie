@@ -12,7 +12,7 @@ model User {
   username   String   @unique
   password   String
   created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
+  updated_at DateTime @default(now()) @updatedAt
 
   @@map("User")
 }
@@ -42,7 +42,7 @@ model Bin {
   id           String         @id @default(dbgenerated("gen_random_uuid()"))
   bin_number   String         @unique
   created_at   DateTime       @default(now())
-  updated_at   DateTime       @updatedAt
+  updated_at   DateTime       @default(now()) @updatedAt
   is_active    Boolean        @default(true)
   BinKycIndex  BinKycIndex?
   orderfileone OrderFileOne[]
@@ -54,7 +54,7 @@ model CardVendor {
   id           String         @id @default(dbgenerated("gen_random_uuid()"))
   vendor_name  String
   created_at   DateTime       @default(now())
-  updated_at   DateTime       @updatedAt
+  updated_at   DateTime       @default(now()) @updatedAt
   is_active    Boolean        @default(true)
   orderfileone OrderFileOne[]
 
@@ -65,7 +65,7 @@ model CardNetwork {
   id           String         @id @default(dbgenerated("gen_random_uuid()"))
   network_name String
   created_at   DateTime       @default(now())
-  updated_at   DateTime       @updatedAt
+  updated_at   DateTime       @default(now()) @updatedAt
   is_active    Boolean        @default(true)
   orderfileone OrderFileOne[]
 
@@ -76,7 +76,7 @@ model CardBank {
   id           String         @id @default(dbgenerated("gen_random_uuid()"))
   bank_name    String
   created_at   DateTime       @default(now())
-  updated_at   DateTime       @updatedAt
+  updated_at   DateTime       @default(now()) @updatedAt
   is_active    Boolean        @default(true)
   orderfileone OrderFileOne[]
 
@@ -88,7 +88,7 @@ model BinKycIndex {
   bin_id      String   @unique
   kyc_index   Int      @default(0)
   phone_index Int      @default(0)
-  updated_at  DateTime @updatedAt
+  updated_at  DateTime @default(now()) @updatedAt
   bin         Bin      @relation(fields: [bin_id], references: [id], onDelete: Cascade)
 }
 
@@ -120,7 +120,7 @@ model PhoneKycOne {
   kyc_id               String
   phone_number_id      String
   created_at           DateTime       @default(now())
-  updated_at           DateTime       @updatedAt
+  updated_at           DateTime       @default(now()) @updatedAt
   monthly_count_kyc    Int?
   yearly_count_kyc     Int?
   monthly_count_number Int?
@@ -139,7 +139,7 @@ model OrderFileOne {
   CardNetwork_id      String
   filename            String
   created_at          DateTime           @default(now())
-  updated_at          DateTime           @updatedAt
+  updated_at          DateTime           @default(now()) @updatedAt
   purchase_order_date DateTime           @default(now())
   required_KYC        Int
   orderFileData       OrderFileDataOne[]
@@ -170,7 +170,7 @@ model UtrDetailOne {
   utr_number    String       @unique
   utr_amount    Float
   created_at    DateTime     @default(now())
-  updated_at    DateTime     @updatedAt
+  updated_at    DateTime     @default(now()) @updatedAt
   orderFile     OrderFileOne @relation(fields: [order_file_id], references: [id], onDelete: Cascade)
 
   @@map("UtrDetailOne")

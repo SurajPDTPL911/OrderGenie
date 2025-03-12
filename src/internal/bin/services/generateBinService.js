@@ -1,5 +1,4 @@
 import db from "../../../config/knexClient.js";
-import { v4 as uuidv4 } from 'uuid';
 
 export const generateBinService = async (binName) => {
   try {
@@ -9,12 +8,8 @@ export const generateBinService = async (binName) => {
       return { status: 400, message: "Bin does exist!" };
     }
 
-    const binId = uuidv4();
-
-    const time = new Date();
-
     const [newBin] = await db("BIN")
-      .insert({ id: binId, bin_number: binName, updated_at: time })
+      .insert({ bin_number: binName })
       .returning(["id", "bin_number"]);
 
     return { status: 200, message: "Bin added", newBin };

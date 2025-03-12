@@ -1,4 +1,4 @@
-import { validateAndFetchKycAndNum } from '../services/generateOrderFileService.js'
+import { validateAndFetchKycAndNum } from '../services/ValidateOrderFileService.js'
 
 export const validate = async(req, res) => {
     try {

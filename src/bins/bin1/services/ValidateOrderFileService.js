@@ -141,11 +141,17 @@ const findSkipRecords = async (bin) => {
 
 export const addToBinKycIndex = async (req, res) => {
   try {
-    const { bin_id, kyc_index, phone_index } = req.body;
+    const { bin_number, kyc_index, phone_index } = req.body;
 
-    console.log(bin_id, kyc_index, phone_index);
+    const bin_id = await db('BIN').where({ bin_number: bin_number }).first();
 
-    const binExists = await db("BIN").where({ id: bin_id }).first();
+    console.log(bin_id.id, kyc_index, phone_index);
+
+    const binId = bin_id.id;
+
+    console.log(binId);
+
+    const binExists = await db("BIN").where({ id: binId }).first();
 
     console.log(binExists);
 
@@ -155,13 +161,10 @@ export const addToBinKycIndex = async (req, res) => {
         .json({ message: "bin_id does not exist in BIN table" });
     }
 
-    let time = new Date();
-
     await db("BinKycIndex").insert({
-      bin_id,
+      bin_id: binId,
       kyc_index: parseInt(kyc_index),
       phone_index: parseInt(phone_index),
-      updated_at: time,
     });
 
     return res.status(200).json({ message: "Record inserted!" });
@@ -170,3 +173,5 @@ export const addToBinKycIndex = async (req, res) => {
     return res.status(400).json({ message: "error occured !" });
   }
 };
+
+
