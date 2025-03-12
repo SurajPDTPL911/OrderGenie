@@ -139,39 +139,157 @@ const findSkipRecords = async (bin) => {
   return skipRecordsKyc;
 };
 
-export const addToBinKycIndex = async (req, res) => {
-  try {
-    const { bin_number, kyc_index, phone_index } = req.body;
+export const handleOrderFileDataService = async (
+  bin,
+  cardNetwork,
+  cardVendor,
+  cardBank,
+  loadAmounts,
+  purchaseOrderDate,
+  requiredKYC,
+  utrDetails
+) => {
+  const today = new Date().toISOString().split("T")[0];
+  console.log(today);
 
-    const bin_id = await db('BIN').where({ bin_number: bin_number }).first();
+  console.log(
+    "bin",
+    bin,
+    "cardNetwork",
+    cardNetwork,
+    "loadAmounts",
+    loadAmounts,
+    "purchaseOrderDate",
+    purchaseOrderDate,
+    "requiredKYC",
+    utrDetails,
+    "card vendor",
+    cardVendor,
+    "card bank",
+    cardBank
+  );
 
-    console.log(bin_id.id, kyc_index, phone_index);
+  const fileName = `${cardVendor}_${cardBank}_${cardNetwork}_Virtual_${requiredKYC}_${purchaseOrderDate}`;
 
-    const binId = bin_id.id;
+  console.log(fileName);
 
-    console.log(binId);
+  const bin_id = await db("BIN").where("bin_number", bin).select("id").first();
 
-    const binExists = await db("BIN").where({ id: binId }).first();
+  const binId = bin_id.id;
 
-    console.log(binExists);
+  console.log("Bin id : ", binId);
 
-    if (!binExists) {
-      return res
-        .status(400)
-        .json({ message: "bin_id does not exist in BIN table" });
-    }
+  const cardNetwork_id = await db("CardNetwork")
+    .where("network_name", cardNetwork)
+    .select("id")
+    .first();
+  const cardVendor_id = await db("CardVendor")
+    .where("vendor_name", cardVendor)
+    .select("id")
+    .first();
+  const cardBank_id = await db("CardBank")
+    .where("bank_name", cardBank)
+    .select("id")
+    .first();
 
-    await db("BinKycIndex").insert({
+  const networkId = cardNetwork_id.id;
+  const bankId = cardBank_id.id;
+  const vendorId = cardVendor_id.id;
+
+  console.log(
+    "Network id : ",
+    networkId,
+    "Bank id : ",
+    bankId,
+    "Vendor id : ",
+    vendorId
+  );
+
+  const doesExist = await db("OrderFileOne")
+    .where({ filename: fileName })
+    .select("id")
+    .first();
+
+  if (!doesExist) {
+    await db("OrderFileOne").insert({
       bin_id: binId,
-      kyc_index: parseInt(kyc_index),
-      phone_index: parseInt(phone_index),
+      CardVendor_id: vendorId,
+      CardBank_id: bankId,
+      CardNetwork_id: networkId,
+      purchase_order_date: purchaseOrderDate,
+      filename: fileName,
+      required_KYC: requiredKYC,
     });
-
-    return res.status(200).json({ message: "Record inserted!" });
-  } catch (error) {
-    console.log(`error : ${error.stack}`);
-    return res.status(400).json({ message: "error occured !" });
   }
+
+  const order_file_id = await db("OrderFileOne")
+    .where("filename", fileName)
+    .first();
+  const orderFileId = order_file_id.id;
+
+  console.log("Order file id :", orderFileId);
+
+  console.log(
+    "Load amount",
+    loadAmounts[0].value,
+    "Amount of cards",
+    loadAmounts[0].cards
+  );
+  console.log(
+    "UTR amount",
+    utrDetails[0].amount,
+    "UTR number",
+    utrDetails[0].number
+  );
+
+  await Promise.all(
+    loadAmounts.map(async (loadAmount) => {
+      console.log(
+        "Load amount:",
+        loadAmount.value,
+        "Amount of cards:",
+        loadAmount.cards
+      );
+
+      const existingLoad = await db("OrderFileDataOne")
+        .where({
+          order_file_id: orderFileId,
+          load_amount: loadAmount.value,
+          load_amount_card: loadAmount.cards,
+        })
+        .first();
+
+      if (!existingLoad) {
+        await db("OrderFileDataOne").insert({
+          order_file_id: orderFileId,
+          load_amount_card: loadAmount.cards,
+          load_amount: loadAmount.value,
+          dob: today,
+          bin,
+        });
+      }
+    })
+  );
+
+  await Promise.all(
+    utrDetails.map(async (utr) => {
+      console.log("UTR amount:", utr.amount, "UTR number:", utr.number);
+
+      const existingUTR = await db("UtrDetailOne")
+        .where({ order_file_id: orderFileId, utr_number: utr.number })
+        .first();
+
+      if (!existingUTR) {
+        await db("OrderFileDataOne").insert({
+          order_file_id: orderFileId,
+          load_amount_card: loadAmount.cards,
+          load_amount: loadAmount.value,
+          dob: today,
+          bin,
+        });
+      }
+    })
+  );
+
+  return {status: 200, message: "This is the end of the service!"};
 };
-
-
