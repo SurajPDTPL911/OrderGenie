@@ -6,9 +6,8 @@ const max_yearly_kyc = 1200
 const max_monthly_number = 10000
 const max_yearly_number = 10000
 
-export const generateExcel = async (req, res) => {
+export const generateExcel = async (fileName) => {
   try {
-    const { fileName } = req.body;
     const fileData = await db("OrderFileOne")
       .select(
         "id",
@@ -20,31 +19,22 @@ export const generateExcel = async (req, res) => {
       .where({ filename: fileName });
 
     const today = new Date().toISOString().split("T")[0];
-    console.log(today);
 
     if (!fileData.length) {
-      return res.status(400).json({ message: "Couldn't find data!" });
+      return {status: 400, message: "Couldn't find data!" };
     }
 
     const { id, required_KYC } = fileData[0];
-
-    console.log(id, required_KYC);
 
     const orderFileData = await db("OrderFileDataOne")
       .select("load_amount_card", "load_amount", "bin")
       .where({ order_file_id: id });
 
-    console.log(orderFileData);
-
     const bin_name = orderFileData[0].bin;
-
-    console.log(bin_name);
 
     const loadAmounts = orderFileData.map(
       ({ load_amount_card, load_amount }) => ({ load_amount_card, load_amount })
     );
-
-    console.log(loadAmounts);
 
     let expandedLoadAmounts = [];
 
@@ -54,12 +44,9 @@ export const generateExcel = async (req, res) => {
       }
     });
 
-    console.log(expandedLoadAmounts);
-
     if (!loadAmounts.length) {
-      return res
-        .status(400)
-        .json({ message: "Couldn't find data (load amounts)!" });
+      return {status: 400,
+        message: "Couldn't find data (load amounts)!"};
     }
 
     const kycData = await db("KycOne")
@@ -69,8 +56,6 @@ export const generateExcel = async (req, res) => {
     const kycIds = kycData.map((kyc) => kyc.id);
     const kycDetails = kycData.map(({ id, ...rest }) => rest);
 
-    console.log(kycData, kycIds, kycDetails);
-
     const phoneData = await db("PhoneNumberOne")
       .select("id", "number")
       .limit(required_KYC);
@@ -78,15 +63,12 @@ export const generateExcel = async (req, res) => {
     const phoneIds = phoneData.map((phone) => phone.id);
     const phoneDetails = phoneData.map(({ id, ...rest }) => rest);
 
-    console.log(phoneData, phoneIds, phoneDetails);
-
     if (
       kycDetails.length < required_KYC ||
       phoneDetails.length < required_KYC
     ) {
-      return res
-        .status(400)
-        .json({ message: "Insufficient KYC or phone number data" });
+        return {status: 400,
+            message: "Insufficient KYC or phone number data"};
     }
 
     const workbook = new exceljs.Workbook();
@@ -107,7 +89,7 @@ export const generateExcel = async (req, res) => {
         const trackResult = await trackKycNumIndex(kycIds[i], phoneIds[i]);
     
         if (!trackResult.success) {
-            return res.status(400).json({ message: trackResult.message });
+            return {status: 400, message: trackResult.message };
         }
 
       worksheet.addRow({
@@ -122,20 +104,12 @@ export const generateExcel = async (req, res) => {
       });
     }
 
-    res.setHeader(
-      "Content-Type",
-      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    );
-    res.setHeader(
-      "Content-Disposition",
-      `attachment; filename=${fileName}.xlsx`
-    );
+    const buffer = await workbook.xlsx.writeBuffer();
+    return { status: 200, buffer };
 
-    await workbook.xlsx.write(res);
-    res.end();
   } catch (error) {
     console.log(error.stack);
-    return res.status(500).json({ message: "Internal Server error" });
+    return {status:500, message: "Internal Server error from service!"};
   }
 };
 
@@ -186,9 +160,7 @@ const trackKycNumIndex = async (kyc_id, phone_number_id) => {
                 yearly_count_number: db.raw('yearly_count_number + 1'),
                 updated_at: db.fn.now()
             });
-
-    console.log("Usage tracked!");
-
+            
     return { success: true, message: 'Usage tracked successfully' };
   } catch (error) {
     console.log(error.stack);

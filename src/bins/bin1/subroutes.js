@@ -1,12 +1,12 @@
 import express from 'express'
 import { handleOrderFileData } from './controllers/handleOrderFile.js'
 import { displayData } from './controllers/displayOrderFile.js';
-import { generateExcel } from './services/generateOrderFileService.js'
+import { generateExcelFile } from './controllers/generateExcel.js'
 
 const router = express.Router()
 
 router.post('/orderFile', handleOrderFileData);
 router.get('/displayData', displayData);
-router.post('/testExcel', generateExcel);
+router.post('/download', generateExcelFile);
 
 export default router;
