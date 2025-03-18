@@ -12,6 +12,11 @@ export const handleOrderFileData = async(req, res) => {
             requiredKYC,
             utrDetails,
           } = req.body;
+
+          if (!bin || !cardNetwork || !cardVendor || !cardBank || !loadAmounts || 
+            !purchaseOrderDate || !requiredKYC || !utrDetails) {
+          return { status: 400, message: "Missing required parameters" };
+        }
         
           const result = await handleOrderFileDataService(bin,
             cardNetwork,

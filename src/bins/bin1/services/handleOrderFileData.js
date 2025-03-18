@@ -10,6 +10,7 @@ export const handleOrderFileDataService = async (
   requiredKYC,
   utrDetails
 ) => {
+
   const today = new Date().toISOString().split("T")[0];
   console.log(today);
 
@@ -53,6 +54,10 @@ export const handleOrderFileDataService = async (
     .select("id")
     .first();
 
+  if (!cardNetwork_id || !cardVendor_id || !cardBank_id) {
+    return { status: 404, message: "Card network, vendor, or bank not found" };
+  }
+
   const networkId = cardNetwork_id.id;
   const bankId = cardBank_id.id;
   const vendorId = cardVendor_id.id;
@@ -86,6 +91,11 @@ export const handleOrderFileDataService = async (
   const order_file_id = await db("OrderFileOne")
     .where("filename", fileName)
     .first();
+
+  if (!order_file_id) {
+    return { status: 500, message: "Failed to create or retrieve order file" };
+  }
+
   const orderFileId = order_file_id.id;
 
   console.log("Order file id :", orderFileId);
@@ -141,12 +151,10 @@ export const handleOrderFileDataService = async (
         .first();
 
       if (!existingUTR) {
-        await db("OrderFileDataOne").insert({
+        await db("UtrDetailOne").insert({
           order_file_id: orderFileId,
-          load_amount_card: loadAmount.cards,
-          load_amount: loadAmount.value,
-          dob: today,
-          bin,
+          utr_number: utr.number,
+          utr_amount: utr.amount,
         });
       }
     })

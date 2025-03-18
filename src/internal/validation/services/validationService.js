@@ -11,7 +11,7 @@ export const getKyc = async (getKycNum, bin) => {
       const recordsToCopy = await db("ParentKyc")
         .select("first_name", "middle_name", "last_name", "email", "is_active")
         .offset(skipRecords.kyc_index)
-        .limit(10);
+        .limit(getKycNum);
   
       console.log(recordsToCopy);
   
@@ -43,7 +43,7 @@ export const getKyc = async (getKycNum, bin) => {
       const recordsToCopy = await db("ParentPhoneNumber")
         .select("number", "is_active")
         .offset(skipRecords.phone_index)
-        .limit(10);
+        .limit(getKycNum);
   
       console.log(recordsToCopy);
   
