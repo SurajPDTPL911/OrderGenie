@@ -6,7 +6,7 @@ import {
   getNum,
 } from "../../../internal/validation/services/validationService.js";
 
-const max_monthly_kyc = 7;
+const max_monthly_kyc = 100;
 const max_yearly_kyc = 1200;
 const max_monthly_number = 10000;
 const max_yearly_number = 10000;
