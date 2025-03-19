@@ -3,8 +3,14 @@ import db from '../../../config/knexClient.js'
 export const getKyc = async (getKycNum, bin) => {
     try {
       console.log(getKycNum, bin);
+
+      const binId = await getBinId(bin);
+
+      console.log(binId[0].id);
   
-      const skipRecords = await findSkipRecords(bin);
+      const skipRecords = await findSkipRecords(binId[0].id);
+
+      console.log(skipRecords);
   
       console.log(`OFFSET: ${skipRecords.kyc_index}`);
   
@@ -138,3 +144,10 @@ export const getKyc = async (getKycNum, bin) => {
       .first();
     return skipRecordsKyc;
   };
+
+  const getBinId = async(bin_name) => {
+    console.log(bin_name);
+    const id = await db('BIN').select('id').where({bin_number: bin_name});
+    console.log(id);
+    return id;
+  }
