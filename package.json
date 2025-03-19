@@ -26,6 +26,7 @@
     "logger": "^0.0.1",
     "morgan": "^1.10.0",
     "multer": "^1.4.5-lts.1",
+    "node-cron": "^3.0.3",
     "p-progress": "^1.0.0",
     "pg": "^8.13.3",
     "pg-copy-streams": "^6.0.6",

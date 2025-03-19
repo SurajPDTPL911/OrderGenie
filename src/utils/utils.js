@@ -98,4 +98,24 @@ export const addCardVendor = async (req, res) => {
   }
 };
 
+export const resetCounts = async() => {
+  const currentDate = new Date();
+  const isNewYear = currentDate.getMonth() === 0 && currentDate.getMonth() === 1;
+
+  try {
+    console.log("Reseting the monthly count");
+
+    await db('PhoneKycOne').update({monthly_count_kyc: 0, monthly_count_number: 0});
+
+    if(isNewYear){
+      console.log("reseting the yearly count")
+
+      await db('PhoneKycOne').update({yearly_count_kyc: 0, yearly_count_number: 0});
+    }
+
+    console.log('Counts reset!');
+  } catch (error) {
+    console.log(`Error while reseting ${error.stack}`);
+  }
+}
 

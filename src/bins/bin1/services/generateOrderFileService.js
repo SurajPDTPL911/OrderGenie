@@ -13,7 +13,7 @@ const max_yearly_number = 10000;
 
 const fetchKycData = async (limit) => {
   return await db("KycOne as k")
-    .select(
+    .select(  
       "k.id",
       "k.first_name",
       "k.last_name",
@@ -145,7 +145,7 @@ export const generateExcel = async (fileName) => {
       const getNumResponse = await getNum(numToGet, bin_name);
       console.log(getNumResponse);
 
-      const additionalphoneData = await fetchKycData(numToGet);
+      const additionalphoneData = await fetchNumData(numToGet);
       phoneData = [...phoneData, ...additionalphoneData];
     }
 

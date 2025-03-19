@@ -6,6 +6,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import { logger, errorHandler } from "./middleware/logEvents.js";
 import Routes from "./routes.js";
+import './utils/resetScheduler.js';
 
 const app = express();
 
