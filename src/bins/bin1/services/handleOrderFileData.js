@@ -2,14 +2,14 @@ import db from "../../../config/knexClient.js";
 
 export const handleOrderFileDataService = async (
   bin,
-  cardNetwork,
-  cardVendor,
-  cardBank,
+  cardDetails,
   loadAmounts,
   purchaseOrderDate,
   requiredKYC,
   utrDetails
 ) => {
+
+  const { cardBank, cardVendor, cardNetwork } = cardDetails;
 
   const today = new Date().toISOString().split("T")[0];
   console.log(today);

@@ -17,11 +17,15 @@ export const handleOrderFileData = async(req, res) => {
             !purchaseOrderDate || !requiredKYC || !utrDetails) {
           return { status: 400, message: "Missing required parameters" };
         }
+
+        const cardDetails = {
+          cardBank: cardBank,
+          cardVendor: cardVendor,
+          cardNetwork: cardNetwork
+        }
         
           const result = await handleOrderFileDataService(bin,
-            cardNetwork,
-            cardVendor,
-            cardBank,
+            cardDetails,
             loadAmounts,
             purchaseOrderDate,
             requiredKYC,
