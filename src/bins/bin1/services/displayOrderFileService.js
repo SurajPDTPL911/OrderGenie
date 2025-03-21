@@ -1,9 +1,12 @@
 import db from '../../../config/knexClient.js';
 
-export const displayOrderFileService = async () => {
+export const displayOrderFileService = async (page, limit) => {
     try {
-        const result = await db("OrderFileOne as c")
+      const offset = (page-1)*limit;
+      console.log(offset);
+        const result = db("OrderFileOne as c")
       .select(
+        "c.id",
         "c.filename",
         "c.required_KYC",
         "v.vendor_name as cardVendor",
@@ -13,9 +16,10 @@ export const displayOrderFileService = async () => {
       )
       .join("CardVendor as v", "c.CardVendor_id", "v.id")
       .join("CardBank as b", "c.CardBank_id", "b.id")
-      .join("CardNetwork as n", "c.CardNetwork_id", "n.id");
-
-      console.log(result);
+      .join("CardNetwork as n", "c.CardNetwork_id", "n.id")
+      .orderBy("c.created_at", "desc")
+      .offset(offset)
+      .limit(limit);
 
       return result;
         

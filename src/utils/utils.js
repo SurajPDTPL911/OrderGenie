@@ -119,3 +119,27 @@ export const resetCounts = async() => {
   }
 }
 
+
+export const addBin = async (req, res) => {
+  try {
+    const { binName } = req.body;
+    const bin_number = await db("BIN").where({ bin_number: binName }).first();
+
+    if (bin_number) {
+      return res.status(400).json({message: "Bin does exist!" });
+    }
+
+    const [newBin] = await db("BIN")
+      .insert({ bin_number: binName })
+      .returning(["id", "bin_number"]);
+
+    return res.status(200).json({message: "Bin added!", newBin });
+  } catch (error) {
+    console.log(`error: ${error.stack}`);
+    return res.status(500).json({message: "Internal Server Error!" });
+  }
+};
+
+export const getFileName = async (id) => {
+  return await db('OrderFileOne').select('filename').where({id: id});
+}

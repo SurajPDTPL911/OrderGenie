@@ -2,7 +2,9 @@ import { displayOrderFileService } from "../services/displayOrderFileService.js"
 
 export const displayData = async(req, res) => {
     try {
-        const result = await displayOrderFileService();
+        const page = parseInt(req.query.page);
+        const limit = parseInt(req.query.limit);
+        const result = await displayOrderFileService(page, limit);
 
         if (!result || result.length === 0) {
             return res.status(404).json({ status: 404, message: "No records found" });

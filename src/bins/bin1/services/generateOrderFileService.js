@@ -66,33 +66,55 @@ const updateCount = async (kyc_id, phone_number_id) => {
   return { status: 200, message: "Updated Indexes!" };
 };
 
-export const generateExcel = async (fileName) => {
+const getCardVendor = async(cardVendor_id) => {
+    return await db('CardVendor').select('vendor_name').where({id: cardVendor_id});
+}
+
+const getCardBank = async(cardBank_id) => {
+    return await db('CardBank').select('bank_name').where({id: cardBank_id});
+}
+
+const getCardNetwork = async(cardNetwork_id) => {
+    return await db('CardNetwork').select('network_name').where({id: cardNetwork_id});
+}
+
+export const generateExcel = async (id) => {
   try {
     const fileData = await db("OrderFileOne")
       .select(
-        "id",
+        "filename",
         "CardVendor_id",
         "CardBank_id",
         "CardNetwork_id",
         "required_KYC"
       )
-      .where({ filename: fileName });
+      .where({ id: id });
+
+      console.log(fileData);
 
     const today = new Date().toISOString().split("T")[0];
 
+    const { CardVendor_id, CardBank_id, CardNetwork_id } = fileData[0];
+
+    const cardVendor = await getCardVendor(CardVendor_id);
+    const cardBank = await getCardBank(CardBank_id);
+    const cardNetwork = await getCardNetwork(CardNetwork_id)
+
+    console.log(cardVendor);
+    
     if (!fileData.length) {
       return { status: 400, message: "Couldn't find data!" };
     }
 
-    const { id, required_KYC } = fileData[0];
+    const { filename, required_KYC } = fileData[0];
+
+    console.log(filename);
 
     const orderFileData = await db("OrderFileDataOne")
       .select("load_amount_card", "load_amount", "bin")
       .where({ order_file_id: id });
 
     const bin_name = orderFileData[0].bin;
-
-    console.log(bin_name);
 
     const loadAmounts = orderFileData.map(
       ({ load_amount_card, load_amount }) => ({ load_amount_card, load_amount })
@@ -106,8 +128,20 @@ export const generateExcel = async (fileName) => {
       }
     });
 
+    console.log(`Hello from Load amounts: ${expandedLoadAmounts}, message ends here !`);
+
     if (!loadAmounts.length) {
       return { status: 400, message: "Couldn't find data (load amounts)!" };
+    }
+
+    const utrFileData = await db("UtrDetailOne")
+    .select("utr_number", "utr_amount")
+    .where({ order_file_id: id });
+
+    let utrLoadAmount = 0;
+
+    for (const utr of utrFileData) {
+      utrLoadAmount += utr.utr_amount;
     }
 
     const validateResponse = await validateAndFetchKycAndNum(
@@ -163,25 +197,27 @@ export const generateExcel = async (fileName) => {
       return { status: 400, message: "Insufficient KYC or phone number data" };
     }
 
-    const workbook = new exceljs.Workbook();
-    const worksheet = workbook.addWorksheet("Order File");
+    const cardType = `${cardBank[0].bank_name} ${cardNetwork[0].network_name}(Virtual)`;
 
-    worksheet.columns = [
-      { header: "S.No", key: "sno", width: 10 },
-      { header: "Load Amount", key: "load_amount", width: 15 },
-      { header: "First Name", key: "first_name", width: 15 },
-      { header: "Last Name", key: "last_name", width: 15 },
-      { header: "Mobile No.", key: "mobile_no", width: 15 },
-      { header: "Email Id*", key: "email_id", width: 20 },
-      { header: "DOB", key: "dob", width: 15 },
-      { header: "Bin", key: "bin", width: 15 },
+    console.log(cardType);
+
+    const workbook = new exceljs.Workbook();
+    const worksheet1 = workbook.addWorksheet("Sheet 1");
+
+    worksheet1.columns = [
+      { header: "S.No", key: "sno", width: 10, style: { alignment: { horizontal: 'center' } } },
+      { header: "First Name", key: "first_name", width: 15, style: { alignment: { horizontal: 'center' } } }, 
+      { header: "Last Name", key: "last_name", width: 15, style: { alignment: { horizontal: 'center' } } },  
+      { header: "Mobile No.", key: "mobile_no", width: 20, style: { alignment: { horizontal: 'center' } } },    
+      { header: "Email Id*", key: "email_id", width: 25, style: { alignment: { horizontal: 'center' } } },    
+      { header: "DOB", key: "dob", width: 15, style: { alignment: { horizontal: 'center' } } },    
+      { header: "Bin", key: "bin", width: 15, style: { alignment: { horizontal: 'center' } } },    
     ];
 
     for (let i = 0; i < required_KYC; i++) {
-      const updateResult = await updateCount(kycIds[i], phoneIds[i]);
-      console.log(updateResult);
+      await updateCount(kycIds[i], phoneIds[i]);
 
-      worksheet.addRow({
+      worksheet1.addRow({
         sno: i + 1,
         load_amount: expandedLoadAmounts[i]?.load_amount || "",
         first_name: kycDetails[i]?.first_name || "",
@@ -190,6 +226,62 @@ export const generateExcel = async (fileName) => {
         email_id: kycDetails[i]?.email || "",
         dob: today || "",
         bin: bin_name || "",
+      });
+    }
+
+    const headerRow = worksheet1.getRow(1);
+      headerRow.eachCell(cell => {
+          cell.font = { bold: true };
+          cell.border = { 
+            top: { style: 'thin' },
+            left: { style: 'thin' },
+            bottom: { style: 'thin' },
+            right: { style: 'thin' }
+        };
+      });
+
+      for(let i = 1; i <= required_KYC + 1; i++){
+        const dataRow = worksheet1.getRow(i);
+          dataRow.eachCell(cell => {
+            cell.border = { 
+              top: { style: 'thin' },
+              left: { style: 'thin' },
+              bottom: { style: 'thin' },
+              right: { style: 'thin' }
+          };
+          });
+      }
+
+    const worksheet2 = workbook.addWorksheet("sheet 2");
+
+    let TotalAmount = 0
+    let countRows = 0
+    
+    worksheet2.addRow(['Legal Name', 'Paramotor Digital Technology', '']);
+    worksheet2.addRow(['', today, '']);
+    worksheet2.addRow(['Card Type', cardType, '']);
+    worksheet2.addRow(['Loading Amount', utrLoadAmount, '']);
+    worksheet2.addRow(['Number Of Cards', required_KYC, '']);
+
+    for(const { utr_number, utr_amount } of utrFileData){
+      countRows += 1;
+      TotalAmount += utr_amount;
+      worksheet2.addRow(['UTR Details', utr_number, utr_amount]);
+    }
+
+    worksheet2.addRow(['', 'Total', TotalAmount]);
+
+    for (let i = 1; i <= required_KYC + 1; i++) {
+      const dataRow = worksheet2.getRow(i);
+      dataRow.eachCell((cell, colIndex) => {
+        cell.alignment = { horizontal: "center" };
+        cell.border = {
+          top: { style: "thin" },
+          left: { style: "thin" },
+          bottom: { style: "thin" },
+          right: { style: "thin" },
+        };
+        worksheet2.getColumn(colIndex).width = 25;
       });
     }
 
