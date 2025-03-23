@@ -7,6 +7,7 @@ import cookieParser from "cookie-parser";
 import { logger, errorHandler } from "./middleware/logEvents.js";
 import Routes from "./routes.js";
 import './utils/resetScheduler.js';
+import status from 'express-status-monitor'
 
 const app = express();
 
@@ -39,6 +40,8 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 
 app.use(logger);
+
+app.use(status());
 
 app.use("/api", Routes);
 

@@ -12,34 +12,12 @@ export const handleOrderFileDataService = async (
   const { cardBank, cardVendor, cardNetwork } = cardDetails;
 
   const today = new Date().toISOString().split("T")[0];
-  console.log(today);
-
-  console.log(
-    "bin",
-    bin,
-    "cardNetwork",
-    cardNetwork,
-    "loadAmounts",
-    loadAmounts,
-    "purchaseOrderDate",
-    purchaseOrderDate,
-    "requiredKYC",
-    utrDetails,
-    "card vendor",
-    cardVendor,
-    "card bank",
-    cardBank
-  );
 
   const fileName = `${cardVendor}_${cardBank}_${cardNetwork}_Virtual_${requiredKYC}_${purchaseOrderDate}`;
-
-  console.log(fileName);
 
   const bin_id = await db("BIN").where("bin_number", bin).select("id").first();
 
   const binId = bin_id.id;
-
-  console.log("Bin id : ", binId);
 
   const cardNetwork_id = await db("CardNetwork")
     .where("network_name", cardNetwork)
@@ -61,15 +39,6 @@ export const handleOrderFileDataService = async (
   const networkId = cardNetwork_id.id;
   const bankId = cardBank_id.id;
   const vendorId = cardVendor_id.id;
-
-  console.log(
-    "Network id : ",
-    networkId,
-    "Bank id : ",
-    bankId,
-    "Vendor id : ",
-    vendorId
-  );
 
   const doesExist = await db("OrderFileOne")
     .where({ filename: fileName })
@@ -97,21 +66,6 @@ export const handleOrderFileDataService = async (
   }
 
   const orderFileId = order_file_id.id;
-
-  console.log("Order file id :", orderFileId);
-
-  console.log(
-    "Load amount",
-    loadAmounts[0].value,
-    "Amount of cards",
-    loadAmounts[0].cards
-  );
-  console.log(
-    "UTR amount",
-    utrDetails[0].amount,
-    "UTR number",
-    utrDetails[0].number
-  );
 
   await Promise.all(
     loadAmounts.map(async (loadAmount) => {
