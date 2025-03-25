@@ -119,10 +119,10 @@ export const resetCounts = async() => {
   }
 }
 
-
 export const addBin = async (req, res) => {
   try {
     const { binName } = req.body;
+    console.log("binName: ", binName);
     const bin_number = await db("BIN").where({ bin_number: binName }).first();
 
     if (bin_number) {

@@ -60,6 +60,7 @@ export const uploadKyc = async (req, res) => {
                 progressEmitter.emit('progress', percentage);  
                 sendEventsToClients({ message: `Inserted Kyc Batch ${i + 1} of ${totalBatches}`, percentage });
             } 
+            sendEventsToClients({ message: 'Insertion Complete', percentage: 100 });
 
             closeSSEConnections();
         }

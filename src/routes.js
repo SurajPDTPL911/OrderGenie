@@ -7,9 +7,10 @@ import express from 'express';
 
 const app = express();
 
-app.use('/internal', authenticate, internalRoutes);
+app.use('/util', utilRoutes);
 app.use('/auth', authRoutes);
-app.use('/', authenticate, binRouts);
-app.use('/', utilRoutes);
+app.use('/internal', authenticate, internalRoutes);
+app.use('/bin', authenticate, binRouts);
+
 
 export default app;
