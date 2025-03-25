@@ -98,8 +98,10 @@ export const uploadNum = async(req, res) => {
                 await db.batchInsert('ParentPhoneNumber', batch, batchSize);
                 const percentage = Math.round(((i + 1)/totalBatches)*100);
                 progressEmitter.emit('progress', percentage);  
-                sendEventsToClients({ message: `Inserted Number Batch ${i + 1} of ${totalBatches}`, percentage });
+                sendEventsToClients({ message: `Inserted Numbers Batch ${i + 1} of ${totalBatches}`, percentage });
             }
+            sendEventsToClients({ message: 'Insertion Complete', percentage: 100 });
+
             closeSSEConnections();
         }
     
