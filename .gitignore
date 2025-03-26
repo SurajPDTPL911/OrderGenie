@@ -5,7 +5,7 @@ package-lock.json
 logs
 files
 pg-local-orderGenie.session.sql
-
+.env
 # IDE / Editor Config
 .vscode/
 .idea/

@@ -94,7 +94,11 @@ export const generateExcel = async (id) => {
 
     const today = new Date().toISOString().split("T")[0];
 
+    console.log(`This is file data : ${fileData[0]}`);
+
     const { CardVendor_id, CardBank_id, CardNetwork_id } = fileData[0];
+
+    console.log("This is the vendor id: ", CardVendor_id);
 
     const cardVendor = await getCardVendor(CardVendor_id);
     const cardBank = await getCardBank(CardBank_id);

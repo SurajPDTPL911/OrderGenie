@@ -3,8 +3,12 @@ import db from "../config/knexClient.js";
 export const addToBinKycIndex = async (req, res) => {
     try {
       const { bin_number, kyc_index, phone_index } = req.body;
+
+      console.log(bin_number, kyc_index, phone_index);
   
       const bin_id = await db("BIN").where({ bin_number: bin_number }).first();
+
+      console.log("This is util!", bin_id);
   
       console.log(bin_id.id, kyc_index, phone_index);
   

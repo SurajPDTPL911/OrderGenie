@@ -43,6 +43,8 @@ export const getKyc = async (getKycNum, bin) => {
       console.log(getKycNum, bin);
   
       const skipRecords = await findSkipRecords(bin);
+
+      console.log(skipRecords);
   
       console.log(`OFFSET: ${skipRecords.phone_index}`);
   
@@ -56,7 +58,7 @@ export const getKyc = async (getKycNum, bin) => {
       await db("PhoneNumberOne").insert(recordsToCopy);
   
       const updated_index = skipRecords.phone_index + recordsToCopy.length;
-  
+
       console.log(updated_index);
   
       await db("BinKycIndex")
@@ -138,10 +140,15 @@ export const getKyc = async (getKycNum, bin) => {
   
   const findSkipRecords = async (bin) => {
     console.log(bin);
+    const id = await  db('BIN').where({bin_number: bin}).select('id');
+    console.log(id)
+    const bin_id = id[0].id;
+    console.log(bin_id);
     const skipRecordsKyc = await db("BinKycIndex")
-      .where("bin_id", bin)
+      .where("bin_id", bin_id)
       .select("kyc_index", "phone_index")
       .first();
+    console.log("This is find skip records : ",skipRecordsKyc);
     return skipRecordsKyc;
   };
 
